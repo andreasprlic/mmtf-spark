@@ -46,10 +46,10 @@ public class ContactFrequencyFinder  implements Serializable {
 		// Set the things we wan't to find 
 		AtomSelectObject selectObjectOne = new AtomSelectObject();
 		// Get all the polymer groups
-		selectObjectOne.setGroupType("polymer");
+		selectObjectOne.setCharged(true);
 		AtomSelectObject selectObjectTwo = new AtomSelectObject();
 		// Get all the non-polymer i.e. ligand groups
-		selectObjectTwo.setGroupType("non-polymer");
+		selectObjectOne.setCharged(true);
 		// Set the cutoff
 		double cutoff = 5.0;
 		// The input path for the data.
