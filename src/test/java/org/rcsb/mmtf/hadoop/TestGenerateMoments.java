@@ -1,10 +1,11 @@
 package org.rcsb.mmtf.hadoop;
 
-import java.awt.Point;
-
 import javax.vecmath.Point3d;
 
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * Class to test the code to generate moments.
@@ -13,6 +14,9 @@ import org.junit.Test;
  */
 public class TestGenerateMoments {
 	
+	/**
+	 * Function to test that the overall process even works.
+	 */
 	@Test
 	public void testOverall() {
 		
@@ -26,10 +30,13 @@ public class TestGenerateMoments {
 		inputArray[5] = new Point3d(new double[]{0.0,12.0,4.0});
 		inputArray[6] = new Point3d(new double[]{-10.0,7.0,249.0});
 		inputArray[7] = new Point3d(new double[]{13.0,3.0,3.0});
-
+		
 		double[] moments = GenerateMoments.getMoments(inputArray);
+		// Check it's twelve long
+		assertEquals(moments.length, 12);
 		for(double moment : moments){
-			System.out.println(moment);
+			// Check none of the elements are null
+			assertNotEquals(moment, null);
 		}
 	}
 

@@ -1,8 +1,12 @@
 package org.rcsb.mmtf.hadoop;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.io.BytesWritable;
@@ -39,17 +43,19 @@ public class FastParse {
 	public static void main(String[] args ) throws IOException
 	{
 
-
+		// Cluster the data into two classes using KMeans
+		int numClusters = Integer.parseInt(args[0]);
+		int numIterations = 10;
+		int numRuns = 1;
+		int fragSize = Integer.parseInt(args[1]);
+		
 		Map<Float,Integer> outMap = new HashMap<>();
-
 		// The input path for the data.
 		String inPath = "/Users/anthony/full";
 		long startTime = System.currentTimeMillis();
 		// This is the default 2 line structure for Spark applications
 		SparkConf conf = new SparkConf().setMaster("local[*]")
-				.setAppName(FastParse.class.getSimpleName())
-				.set("spark.memory.fraction", "0.9")
-				.set("spark.memory.storageFraction", "0.1");
+				.setAppName(FastParse.class.getSimpleName()); 		
 		// Set the config for the spark context
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		JavaRDD<Vector> fragmentRdd = sc
@@ -61,21 +67,16 @@ public class FastParse {
 				// Roughly a minute
 				.mapToPair(t -> new Tuple2<String, StructureDataInterface>(t._1,  new DefaultDecoder(t._2)))
 				// Now find all the fragments in each structure
-				.flatMapToPair(new FragmentProteins(8))
+				.flatMapToPair(new FragmentProteins(fragSize))
 				// Now generate the moments for these fragments
 				.mapToPair(t -> new Tuple2<String,double[]>(t._1, GenerateMoments.getMoments(t._2)))
 				// Convert to vectors for clustering
 				.map(t -> Vectors.dense(t._2))
 				// Only cluster 1% of the data
-				.sample(false, 0.01)
+				.sample(false, 1.00)
 				// Cache them
 				.cache();
 
-
-		// Cluster the data into two classes using KMeans
-		int numClusters = 250;
-		int numIterations = 10;
-		int numRuns = 1;
 		// http://theory.stanford.edu/~sergei/papers/vldb12-kmpar.pdf
 		String initializationMode = "k-means||";
 		// Now train the model
@@ -84,13 +85,18 @@ public class FastParse {
 	    double WSSSE = clusters.computeCost(fragmentRdd.rdd());
 	    System.out.println("Within Set Sum of Squared Errors = " + WSSSE);
 	    // Now find the cluster centers
+	    List<double[]> outClusters = new ArrayList<>();
 	    for(Vector clusterCenter : clusters.clusterCenters()) {
 	    	// Print out this data
 	    	System.out.println(clusterCenter.toJson());
 	    	System.out.println(clusterCenter.numActives());
+	    	outClusters.add(clusterCenter.toArray());
 	    }
 	    // Save the clusters
-	    clusters.save(sc.sc(), "model");
+		FileOutputStream fout = new FileOutputStream("clusters_"+numClusters+"_"+fragSize);
+		ObjectOutputStream oos = new ObjectOutputStream(fout);   
+		oos.writeObject(outClusters);
+		oos.close();
 		// Now print the number of fragments found
 		System.out.println(fragmentRdd.count()+" fragments found.");
 		long endTime = System.currentTimeMillis();

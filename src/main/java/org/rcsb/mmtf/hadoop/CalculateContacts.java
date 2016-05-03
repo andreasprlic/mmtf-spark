@@ -21,15 +21,20 @@ import scala.Tuple2;
  * @author Anthony Bradley
  *
  */
-public class CalculateContacts implements FlatMapFunction<Tuple2<String,StructureDataInterface>, String>{
+public class CalculateContacts implements FlatMapFunction<Tuple2<String,StructureDataInterface>, AtomContact>{
 
 	private double cutoff;
+	private AtomSelectObject selectObjectOne;
+	private AtomSelectObject selectObjectTwo;
 
 	/**
 	 * @param cutoff
 	 */
-	public CalculateContacts(double cutoff) {
+	public CalculateContacts(AtomSelectObject selectObjectOne, 
+			AtomSelectObject selectObjectTwo, double cutoff) {
 		this.cutoff = cutoff;
+		this.selectObjectOne = selectObjectOne;
+		this.selectObjectTwo = selectObjectTwo;
 	}
 
 
@@ -39,13 +44,12 @@ public class CalculateContacts implements FlatMapFunction<Tuple2<String,Structur
 	private static final long serialVersionUID = 7102351722106317536L;
 
 	@Override
-	public Iterable<String> call(Tuple2<String, StructureDataInterface> t) throws Exception {
+	public Iterable<AtomContact> call(Tuple2<String, StructureDataInterface> t) throws Exception {
 		// Get the pdb Id and the structure to loop through
 		String pdbId = t._1;
 		StructureDataInterface structure = t._2;
 		// The list to return all the results in it must match Iterable<Tuple2<String, Float>> (return type of call) and String,
-		List<String> outList = getDist(structure, pdbId, cutoff);
-		return outList;
+		return getDist(structure, pdbId, cutoff);
 	}
 
 	/**
@@ -54,39 +58,26 @@ public class CalculateContacts implements FlatMapFunction<Tuple2<String,Structur
 	 * @param structure the input structure to calculate from
 	 * @return the list of {@link AtomContact} objects
 	 */
-	private List<String> getDist(StructureDataInterface structure, String pdbCode, double cutoff) {
-		List<String> outList  = new ArrayList<>();
-		List<Atom> atomList = ChargeUtils.getChargedAtoms(structure);
-		if(atomList.size()>0){
-			AtomContactSet atomConactSet = ChargeUtils.getAtomContacts(atomList, cutoff);
-			for(AtomContact atomContact : atomConactSet){
-				// Maybe add a filter here to ensure they're not 
-				// in the same group
-				Atom atomOne = atomContact.getPair().getFirst();
-				Atom atomTwo = atomContact.getPair().getSecond();
-				double distance = atomContact.getDistance();
-				if(!atomOne.getGroup().getResidueNumber().getSeqNum().equals(atomTwo.getGroup().getResidueNumber().getSeqNum())){
-					// This is how we write out each line in the file
-					outList.add(writeLine(pdbCode, atomOne.getPDBserial(), atomOne.getCharge(), atomTwo.getPDBserial(), atomOne.getCharge(), distance));
+	private List<AtomContact> getDist(StructureDataInterface structure, String pdbCode, double cutoff) {
+		List<AtomContact> outList  = new ArrayList<>();;
+		List<Atom> atomListTwo = ChargeUtils.getAtoms(structure, selectObjectOne);
+		if(atomListTwo.size()>0){
+			List<Atom> atomListOne = ChargeUtils.getAtoms(structure, selectObjectTwo);
+			if(atomListOne.size()>0){
+				AtomContactSet atomContactSet = ChargeUtils.getAtomContacts(atomListOne, atomListTwo, cutoff);
+				for(AtomContact atomContact : atomContactSet){
+					// Maybe add a filter here to ensure they're not 
+					// in the same group
+					Atom atomOne = atomContact.getPair().getFirst();
+					Atom atomTwo = atomContact.getPair().getSecond();
+					// They shouldn't be part of the same group
+					if(!atomOne.getGroup().getResidueNumber().getSeqNum().equals(atomTwo.getGroup().getResidueNumber().getSeqNum())){
+						// This is how we write out each line in the file
+						outList.add(atomContact);
+					}
 				}
 			}
 		}
 		return outList;
-	}
-
-	/**
-	 * Function to write out each line of the total data file for the interactions.
-	 * @param pdbCode the pdb code of the entry
-	 * @param atomIdOne the serial id of atom one
-	 * @param chargeOne the charge on atom one
-	 * @param atomIdTwo the serial id of atom two
-	 * @param chargeTwo the charge on atom two
-	 * @param distance the distance between the two atoms in Angstromss
-	 * @return the formatted string
-	 */
-	private String writeLine(String pdbCode, int atomIdOne, short chargeOne, int atomIdTwo, short chargeTwo,
-			double distance) {
-		// Very simple comma delimited string
-		return pdbCode+","+atomIdOne+","+chargeOne+","+atomIdTwo+","+chargeTwo+","+distance;
 	}
 }

@@ -37,9 +37,17 @@ public class FragmentProteins implements PairFlatMapFunction<Tuple2<String,Struc
 
 	@Override
 	public Iterable<Tuple2<String, Point3d[]>> call(Tuple2<String, StructureDataInterface> t) throws Exception {
+		return getStructureAsFragments(t._2);
+	}
 
+
+	/**
+	 * Get the fragments for a given structure.
+	 * @param structureDataInterface the input {@link StructureDataInterface}
+	 * @return the list of fragments - in pairs. The String describes the fragment.
+	 */
+	public List<Tuple2<String, Point3d[]>> getStructureAsFragments(StructureDataInterface structureDataInterface) {
 		List<Tuple2<String, Point3d[]>> outList = new ArrayList<>();
-		StructureDataInterface structureDataInterface = t._2;
 		// Get the PDB id
 		String pdbId = structureDataInterface.getStructureId();
 		Map<Integer,String> chainIndexToEntityTypeMap = getChainEntity(structureDataInterface);
@@ -48,7 +56,7 @@ public class FragmentProteins implements PairFlatMapFunction<Tuple2<String,Struc
 		// Now loop through the entities
 		for(int i=0; i<structureDataInterface.getNumChains(); i++){
 			String chainId = pdbId+"."+structureDataInterface.getChainIds()[i];
-			if(chainIndexToEntityTypeMap.get(i).equals("polymer")){
+			if(chainIndexToEntityTypeMap.get(i)==null || chainIndexToEntityTypeMap.get(i).equals("polymer")){
 				int fragCounter = 0;
 				// Loop over the group indices
 				List<Point3d> fragList = new ArrayList<>();
