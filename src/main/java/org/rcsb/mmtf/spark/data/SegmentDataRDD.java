@@ -99,4 +99,13 @@ public class SegmentDataRDD {
 		return new SegmentClusters(seqMap.groupByKey());
 	}
 	
+	/**
+	 * Cache the data. Good if the user wants to produce multiple analyses off the same
+	 * data.
+	 * @return the cached data object.
+	 */
+	public SegmentDataRDD cache() {
+		return new SegmentDataRDD(segmentRDD.cache());
+	}
+	
 }

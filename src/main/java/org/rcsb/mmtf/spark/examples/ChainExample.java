@@ -2,9 +2,11 @@ package org.rcsb.mmtf.spark.examples;
 
 import java.io.IOException;
 
+import org.apache.spark.api.java.JavaDoubleRDD;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.rcsb.mmtf.spark.SparkUtils;
+import org.rcsb.mmtf.spark.data.Segment;
 import org.rcsb.mmtf.spark.data.SegmentDataRDD;
-import org.rcsb.mmtf.spark.data.StructureDataRDD;
 
 /**
  * An example of taking a list of PDB IDs, pulling them from the MMTF server and 
@@ -21,10 +23,14 @@ public class ChainExample {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-//		SegmentDataRDD calphaChains = SparkUtils.getCalphaChains(new String[] {"1AQ1", "4CUP"});
-		SegmentDataRDD calphaChains = new StructureDataRDD(
-				SparkUtils.getStructureDataRdd("/Users/anthony/full")).getCalpha();
-		System.out.println(calphaChains.getLengthDist().mean());	
+		SegmentDataRDD calphaChains = SparkUtils.getCalphaChains(new String[] {"1AQ1", "4CUP"});
+		JavaDoubleRDD lengthDist = calphaChains.getLengthDist().cache();
+		System.out.println(lengthDist.mean());
+		System.out.println(lengthDist.min());
+		System.out.println(lengthDist.max());
+		System.out.println(lengthDist.count());	
+		// Now we can get the Raw RDD and do things on this.
+		JavaPairRDD<String, Segment> segmentRDD = calphaChains.getSegmentRDD();
 	}
 
 }
