@@ -3,6 +3,7 @@ package org.rcsb.mmtf.hadoop;
 import javax.vecmath.Point3d;
 
 import org.junit.Test;
+import org.rcsb.mmtf.spark.mappers.GenerateMoments;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;

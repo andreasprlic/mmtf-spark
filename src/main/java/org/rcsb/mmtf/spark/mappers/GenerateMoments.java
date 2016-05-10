@@ -1,4 +1,5 @@
-package org.rcsb.mmtf.hadoop;
+package org.rcsb.mmtf.spark.mappers;
+
 
 
 import javax.vecmath.Point3d;

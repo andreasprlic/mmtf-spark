@@ -1,4 +1,4 @@
-package org.rcsb.mmtf.hadoop;
+package org.rcsb.mmtf.spark.mappers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,45 +9,38 @@ import javax.vecmath.Point3d;
 
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.rcsb.mmtf.api.StructureDataInterface;
+import org.rcsb.mmtf.spark.data.Segment;
 
 import scala.Tuple2;
 
 /**
- * Class to fragment a {@link StructureDataInterface} into
- * fragments of length declared in declaration.
+ * A mapper from {@link StructureDataInterface} to the {@link Point3d}[] of the calpha coordinates.
  * @author Anthony Bradley
  *
  */
-public class FragmentProteins implements PairFlatMapFunction<Tuple2<String,StructureDataInterface>, String, Point3d[]>{
+public class GenerateSegments implements PairFlatMapFunction<Tuple2<String,StructureDataInterface>,String, Segment> {
 
+	/** Define the length of a fragment. Null implies each chain is a fragment */
+	private Integer fragmentLength;
+	
 	/**
-	 * 
+	 * Constructor of the class. 
+	 * @param fragmentLength the length of each fragment. Null means take each Chain as 
+	 * as single fragment.
 	 */
-	private static final long serialVersionUID = 3164422254869833259L;
-	private int fragmentLength;
-
-	/**
-	 * Constructor that sets the length of the fragments
-	 * @param fragmentLength
-	 */
-	public FragmentProteins(int fragmentLength) {
+	public GenerateSegments(Integer fragmentLength) {
 		this.fragmentLength = fragmentLength;
 	}
-
+	
+	/**
+	 * The serial id for this version of the class.
+	 */
+	private static final long serialVersionUID = -1187474691802866518L;
 
 	@Override
-	public Iterable<Tuple2<String, Point3d[]>> call(Tuple2<String, StructureDataInterface> t) throws Exception {
-		return getStructureAsFragments(t._2);
-	}
-
-
-	/**
-	 * Get the fragments for a given structure.
-	 * @param structureDataInterface the input {@link StructureDataInterface}
-	 * @return the list of fragments - in pairs. The String describes the fragment.
-	 */
-	public List<Tuple2<String, Point3d[]>> getStructureAsFragments(StructureDataInterface structureDataInterface) {
-		List<Tuple2<String, Point3d[]>> outList = new ArrayList<>();
+	public Iterable<Tuple2<String, Segment>> call(Tuple2<String, StructureDataInterface> t) throws Exception {
+		StructureDataInterface structureDataInterface = t._2;
+		List<Tuple2<String, Segment>> outList = new ArrayList<>();
 		// Get the PDB id
 		String pdbId = structureDataInterface.getStructureId();
 		Map<Integer,String> chainIndexToEntityTypeMap = getChainEntity(structureDataInterface);
@@ -60,6 +53,7 @@ public class FragmentProteins implements PairFlatMapFunction<Tuple2<String,Struc
 				int fragCounter = 0;
 				// Loop over the group indices
 				List<Point3d> fragList = new ArrayList<>();
+				String sequence = "";
 				for(int groupId=0; groupId<structureDataInterface.getGroupsPerChain()[i]; groupId++){
 					// Now get the CA coord
 					int groupType = structureDataInterface.getGroupTypeIndices()[groupCounter];
@@ -68,13 +62,21 @@ public class FragmentProteins implements PairFlatMapFunction<Tuple2<String,Struc
 					groupCounter++;
 					if(point3d!=null){
 						fragList.add(point3d);
+						sequence+=structureDataInterface.getGroupSingleLetterCode(groupType);
 					}
-					if (fragList.size()==fragmentLength) {
-						outList.add(new Tuple2<String, Point3d[]>(chainId+fragCounter, fragList.toArray(new Point3d[fragmentLength])));
+					if (fragmentLength!=null && fragList.size()==fragmentLength) {
+						outList.add(new Tuple2<String, Segment>(chainId+fragCounter, 
+								new Segment(sequence, fragList.toArray(new Point3d[fragmentLength]))));
 						fragList.remove(fragmentLength-1);
+						sequence = sequence.substring(1, sequence.length());
 						fragCounter++;
 					}
 				}
+				if (fragmentLength==null && fragList.size()!=0) {
+					outList.add(new Tuple2<String, Segment>(chainId, 
+							new Segment(sequence, fragList.toArray(new Point3d[fragList.size()]))));
+				}
+				
 			}
 		}
 		return outList;
@@ -117,7 +119,6 @@ public class FragmentProteins implements PairFlatMapFunction<Tuple2<String,Struc
 		}
 		return null;
 	}
-
 
 
 }
