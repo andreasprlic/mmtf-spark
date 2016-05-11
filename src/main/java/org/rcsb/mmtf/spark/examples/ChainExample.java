@@ -17,8 +17,8 @@ public class ChainExample {
 
 	/**
 	 * The main function to take the input IDs.
-	 * @param args
-	 * @throws IOException
+	 * @param args the arguments for the function
+	 * @throws IOException due to an error reading from the URL
 	 */
 	public static void main(String[] args) throws IOException {
 		SegmentDataRDD calphaChains = SparkUtils.getCalphaChains(new String[] {"1AQ1", "4CUP"}).filterMinLength(10);

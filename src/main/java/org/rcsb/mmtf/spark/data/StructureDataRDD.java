@@ -44,8 +44,9 @@ public class StructureDataRDD {
 	
 	/**
 	 * A constructor to download the PDB on construction.
-	 * @throws IOException 
-	 * @throws FileNotFoundException 
+	 * @param download whether to update or not
+	 * @throws IOException due to retrieving data from the URL
+	 * @throws FileNotFoundException whilst transferring data
 	 */
 	public StructureDataRDD(boolean download) throws FileNotFoundException, IOException {
 		SparkUtils.downloadPdb();
@@ -188,6 +189,7 @@ public class StructureDataRDD {
 	 * Allow the user to sample the data.
 	 * @param fraction the fraction of data 
 	 * to be used (e.g. 0.1 retains 10%)
+	 * @return the {@link SegmentDataRDD} updated
 	 */
 	public StructureDataRDD sample(double fraction) {
 		return new StructureDataRDD(javaPairRdd.sample(false, fraction));

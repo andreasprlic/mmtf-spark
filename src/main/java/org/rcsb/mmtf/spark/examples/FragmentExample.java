@@ -13,7 +13,7 @@ public class FragmentExample {
 	
 	/**
 	 * Function to fragment and group those fragments based on sequence identity.
-	 * @param args
+	 * @param args the arguments for the function
 	 */
 	public static void main(String[] args) {		
 		SegmentClusters fragCLusters = new StructureDataRDD().getFragments(8).groupBySequence();

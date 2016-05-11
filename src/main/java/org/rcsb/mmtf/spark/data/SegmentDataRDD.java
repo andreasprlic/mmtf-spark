@@ -77,7 +77,7 @@ public class SegmentDataRDD {
 
 	/**
 	 * Filter the segments so a non-redundant set is available.
-	 * @param the similarity (e.g. sequence identity) to permit
+	 * @param similarity the similarity (e.g. sequence identity) to permit
 	 * @return the {@link SegmentDataRDD} of non-redundant sequences
 	 */
 	public SegmentDataRDD findNonRedundantSet(double similarity) {

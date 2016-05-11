@@ -75,6 +75,7 @@ public class AtomSelectObject implements Serializable {
 	/**
 	 * Set the list of atom names allowed.
 	 * @param atomNameList the atomNameList to set
+	 * @return the {@link AtomSelectObject} updated
 	 */
 	public AtomSelectObject atomNameList(List<String> atomNameList) {
 		this.atomNameList = atomNameList;
@@ -84,6 +85,7 @@ public class AtomSelectObject implements Serializable {
 	/**
 	 * Set the array of atom names allowed.
 	 * @param atomNameList the atomNameList to set
+	 * @return the {@link AtomSelectObject} updated
 	 */
 	public AtomSelectObject atomNameList(String[] atomNameList) {
 		this.atomNameList = Arrays.asList(atomNameList);
@@ -100,6 +102,7 @@ public class AtomSelectObject implements Serializable {
 	/**
 	 * Set the list of element names allowed.
 	 * @param elementNameList the elementNameList to set
+	 * @return the {@link AtomSelectObject} updated
 	 */
 	public AtomSelectObject elementNameList(List<String> elementNameList) {
 		this.elementNameList = elementNameList;
@@ -109,6 +112,7 @@ public class AtomSelectObject implements Serializable {
 	/**
 	 * Set the array of element names allowed.
 	 * @param elementNameList the elementNameList to set
+	 * @return the {@link AtomSelectObject} updated
 	 */
 	public AtomSelectObject elementNameList(String[] elementNameList) {
 		this.elementNameList = Arrays.asList(elementNameList);
@@ -125,6 +129,7 @@ public class AtomSelectObject implements Serializable {
 	/**
 	 * Set the list of group names allowed.
 	 * @param groupNameList the groupNameList to set
+	 * @return the {@link AtomSelectObject} updated
 	 */
 	public AtomSelectObject groupNameList(List<String> groupNameList) {
 		this.groupNameList = groupNameList;
@@ -135,6 +140,7 @@ public class AtomSelectObject implements Serializable {
 	/**
 	 * Set the array of group names allowed.
 	 * @param groupNameList the groupNameList to set
+	 * @return the {@link AtomSelectObject} updated
 	 */
 	public AtomSelectObject groupNameList(String[] groupNameList) {
 		this.groupNameList = Arrays.asList(groupNameList);
@@ -151,6 +157,7 @@ public class AtomSelectObject implements Serializable {
 	/**
 	 * Set whether charged elements spuld be found
 	 * @param charged the charged to set
+	 * @return the {@link AtomSelectObject} updated
 	 */
 	public AtomSelectObject charged(boolean charged) {
 		this.charged = charged;
@@ -168,8 +175,9 @@ public class AtomSelectObject implements Serializable {
 	/**
 	 * Set the type of group allowed.
 	 * @param groupType the groupType to set
+	 * @return the {@link AtomSelectObject} updated
 	 */
-	public AtomSelectObject setGroupType(String groupType) {
+	public AtomSelectObject groupType(String groupType) {
 		this.groupType = groupType;
 		return this;
 	}

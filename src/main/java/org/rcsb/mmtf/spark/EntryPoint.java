@@ -31,7 +31,7 @@ public class EntryPoint {
 
 	/**
 	 * Function to set up the gateway server and get it going.
-	 * @param args
+	 * @param args the input arguments
 	 */
 	public static void main(String[] args) {
 		GatewayServer gatewayServer = new GatewayServer(new EntryPoint());

@@ -59,7 +59,6 @@ public class SparkUtils {
 	/**
 	 * Get an {@link JavaPairRDD} of {@link String} {@link StructureDataInterface} from a file path.
 	 * @param filePath the input path to the hadoop sequence file
-	 * @param javaSparkContext the {@link JavaSparkContext} 
 	 * @return the {@link JavaPairRDD} of {@link String} {@link StructureDataInterface}
 	 */
 	public static JavaPairRDD<String, StructureDataInterface> getStructureDataRdd(String filePath) {
@@ -110,6 +109,7 @@ public class SparkUtils {
 
 	/**
 	 * Get the {@link JavaSparkContext} for this run.
+	 * @param conf the {@link SparkConf} to use to setup the context
 	 * @return the {@link JavaSparkContext} for this run
 	 */
 	public static JavaSparkContext getSparkContext(SparkConf conf){
@@ -128,7 +128,7 @@ public class SparkUtils {
 
 	/**
 	 * Set the file path of the Hadoop file to read.
-	 * @param filePath
+	 * @param filePath the input file path to read
 	 */
 	public static void filePath(String filePath) {
 		hadoopFilePath = filePath;
@@ -180,7 +180,7 @@ public class SparkUtils {
 	 * Compress a byte array using Gzip.
 	 * @param byteArray the input byte array
 	 * @return the compressed byte array
-	 * @throws IOException
+	 * @throws IOException an error reading from the URL
 	 */
 	public static byte[] gzipCompress(byte[] byteArray) throws IOException {
 		// Function to gzip compress the data for the hashmaps
@@ -218,8 +218,8 @@ public class SparkUtils {
 
 	/**
 	 * Function to download the PDB and place it on the file system.
-	 * @throws IOException 
-	 * @throws FileNotFoundException 
+	 * @throws IOException  an error reading from the URL
+	 * @throws FileNotFoundException an error transferring files
 	 */
 	public static void downloadPdb() throws FileNotFoundException, IOException {
 		// Get the base path
@@ -293,9 +293,9 @@ public class SparkUtils {
 	 * Get the Calpha chains for a few structures as a SegmentDataRDD.
 	 * @param inputIds the list of input ids as strings
 	 * @throws IOException due to reading from the MMTF url
+	 * @return the {@link SegmentDataRDD} of the calpha chains given the ids.
 	 */
 	public static SegmentDataRDD getCalphaChains(String[] inputIds) throws IOException {
-
 		// Load these structures
 		List<Tuple2<String, byte[]>> totalList = new ArrayList<>();
 		for(String pdbId : inputIds) {
@@ -338,11 +338,16 @@ public class SparkUtils {
 	}
 	
 	/**
-	 * Utility function to generate an {@link AtomSelectObject}. Mainly for application to the Python
-	 * API.
+	 * Utility function to generate an {@link AtomSelectObject}. 
+	 * Mainly for application to the Python API.
+	 * @param atomNameList the list of atoms to consider
+	 * @param groupNameList the list of groups to consider (e.g. LYS)
+	 * @param charged whether to consider charged atoms only (true)
+	 * @param elementNameList the list of elements to consider
 	 * @return an atom select object of the appropriate type.
 	 */
-	public AtomSelectObject generateAtomSelectObject(List<String> atomNameList, List<String> groupNameList, boolean charged, List<String> elementNameList) {
+	public AtomSelectObject generateAtomSelectObject(List<String> atomNameList, 
+			List<String> groupNameList, boolean charged, List<String> elementNameList) {
 		return new AtomSelectObject()
 				.atomNameList(atomNameList)
 				.charged(charged)
@@ -352,7 +357,7 @@ public class SparkUtils {
 
 	/**
 	 * Get a {@link JavaPairRDD} of Integers to do a half matrix comparison. i.e. all comparisons
-	 * where i!=j and i>j
+	 * where i!=j and i is greather than j
 	 * @param numMembers the total number of members to compare
 	 * @return the {@link JavaPairRDD} of the comparisons
 	 */

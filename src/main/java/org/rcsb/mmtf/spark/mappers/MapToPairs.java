@@ -15,17 +15,16 @@ import scala.Tuple2;
 public class MapToPairs implements PairFlatMapFunction<Integer,Integer,Integer> {
 
 	/**
-	 * 
+	 * The serial id for this version of the class
 	 */
 	private static final long serialVersionUID = -7282152297877946517L;
 	private int totalNum;
 	
 	/**
 	 * Constructor takes the to 
-	 * @param totalNum
+	 * @param totalNum the size of the matrix to calculate
 	 */
 	public MapToPairs(int totalNum) {
-		
 		this.totalNum = totalNum;
 	}
 	
