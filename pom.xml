@@ -9,7 +9,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.rcsb</groupId>
 	<artifactId>mmtf-spark</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>mmtf-spark</name>
@@ -43,7 +43,7 @@
 		<connection>scm:git:git://github.com:rcsb/mmtf-spark.git</connection>
 		<developerConnection>scm:git:git@github.com:rcsb/mmtf-spark.git</developerConnection>
 		<url>https://github.com/rcsb/mmtf-spark</url>
-		<tag>mmtf-spark-0.0.1</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	
