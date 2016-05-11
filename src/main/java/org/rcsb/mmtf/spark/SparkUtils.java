@@ -30,6 +30,7 @@ import org.rcsb.mmtf.dataholders.MmtfStructure;
 import org.rcsb.mmtf.decoder.DefaultDecoder;
 import org.rcsb.mmtf.decoder.ReaderUtils;
 import org.rcsb.mmtf.serialization.MessagePackSerialization;
+import org.rcsb.mmtf.spark.data.AtomSelectObject;
 import org.rcsb.mmtf.spark.data.SegmentDataRDD;
 import org.rcsb.mmtf.spark.data.StructureDataRDD;
 import org.rcsb.mmtf.spark.mappers.FlatMapIntList;
@@ -334,6 +335,19 @@ public class SparkUtils {
 			if (is != null) { is.close(); }
 		}
 		return baos.toByteArray();
+	}
+	
+	/**
+	 * Utility function to generate an {@link AtomSelectObject}. Mainly for application to the Python
+	 * API.
+	 * @return an atom select object of the appropriate type.
+	 */
+	public AtomSelectObject generateAtomSelectObject(List<String> atomNameList, List<String> groupNameList, boolean charged, List<String> elementNameList) {
+		return new AtomSelectObject()
+				.atomNameList(atomNameList)
+				.charged(charged)
+				.groupNameList(groupNameList)
+				.elementNameList(elementNameList);
 	}
 
 	/**
