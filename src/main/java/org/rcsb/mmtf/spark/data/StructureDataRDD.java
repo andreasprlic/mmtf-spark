@@ -192,6 +192,6 @@ public class StructureDataRDD {
 	public StructureDataRDD sample(double fraction) {
 		return new StructureDataRDD(javaPairRdd.sample(false, fraction));
 	}
-	
+
 
 }

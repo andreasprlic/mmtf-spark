@@ -38,7 +38,7 @@ public class Segment implements Serializable {
 	/**
 	 * @return the {@link Point3d} array specifying the structure of this segment.
 	 */
-	public Point3d[] getStructure() {
+	public Point3d[] getCoordinates() {
 		return structure;
 	}
 

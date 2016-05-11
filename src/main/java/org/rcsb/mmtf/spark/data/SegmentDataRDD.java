@@ -41,7 +41,7 @@ public class SegmentDataRDD {
 	 * @return the {@link JavaDoubleRDD} of the lengths
 	 */
 	public JavaDoubleRDD getLengthDist() {
-		return segmentRDD.mapToDouble(t -> t._2.getStructure().length);
+		return segmentRDD.mapToDouble(t -> t._2.getCoordinates().length);
 	}
 	
 	/**
@@ -50,7 +50,7 @@ public class SegmentDataRDD {
 	 * @return the {@link SegmentDataRDD} after filtering
 	 */
 	public SegmentDataRDD filterMinLength(int min) {
-		return new SegmentDataRDD(segmentRDD.filter(t -> t._2.getStructure().length>min));
+		return new SegmentDataRDD(segmentRDD.filter(t -> t._2.getCoordinates().length>min));
 	}
 	
 	/**
@@ -59,7 +59,7 @@ public class SegmentDataRDD {
 	 * @return the {@link SegmentDataRDD} after filtering
 	 */
 	public SegmentDataRDD filterMaxLength(int max) {
-		return new SegmentDataRDD(segmentRDD.filter(t -> t._2.getStructure().length<max));
+		return new SegmentDataRDD(segmentRDD.filter(t -> t._2.getCoordinates().length<max));
 		
 	}
 	
@@ -70,8 +70,8 @@ public class SegmentDataRDD {
 	 * @return the {@link SegmentDataRDD} after filtering
 	 */
 	public SegmentDataRDD filterLength(int min, int max) {
-		return new SegmentDataRDD(segmentRDD.filter(t -> t._2.getStructure().length<max 
-				&& t._2.getStructure().length>min));
+		return new SegmentDataRDD(segmentRDD.filter(t -> t._2.getCoordinates().length<max 
+				&& t._2.getCoordinates().length>min));
 	}
 	
 
@@ -80,14 +80,13 @@ public class SegmentDataRDD {
 	 * @param the similarity (e.g. sequence identity) to permit
 	 * @return the {@link SegmentDataRDD} of non-redundant sequences
 	 */
-	public SegmentDataRDD findRedundantSet(double similarity) {
+	public SegmentDataRDD findNonRedundantSet(double similarity) {
 		System.err.println("Currently not functioning");
 		return new SegmentDataRDD(segmentRDD);
 	}
 	
 	/**
 	 * Group by sequence identity.
-	 * @param the similarity (e.g. sequence identity) to permit
 	 * @return the {@link SegmentDataRDD} of non-redundant sequences
 	 */
 	public SegmentClusters groupBySequence() {
@@ -107,5 +106,6 @@ public class SegmentDataRDD {
 	public SegmentDataRDD cache() {
 		return new SegmentDataRDD(segmentRDD.cache());
 	}
+	 
 	
 }

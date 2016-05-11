@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
@@ -22,6 +23,7 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.rcsb.mmtf.api.StructureDataInterface;
 import org.rcsb.mmtf.dataholders.MmtfStructure;
@@ -30,6 +32,8 @@ import org.rcsb.mmtf.decoder.ReaderUtils;
 import org.rcsb.mmtf.serialization.MessagePackSerialization;
 import org.rcsb.mmtf.spark.data.SegmentDataRDD;
 import org.rcsb.mmtf.spark.data.StructureDataRDD;
+import org.rcsb.mmtf.spark.mappers.FlatMapIntList;
+import org.rcsb.mmtf.spark.mappers.MapToPairs;
 import org.rcsb.mmtf.utils.CodecUtils;
 
 import scala.Tuple2;
@@ -330,5 +334,18 @@ public class SparkUtils {
 			if (is != null) { is.close(); }
 		}
 		return baos.toByteArray();
+	}
+
+	/**
+	 * Get a {@link JavaPairRDD} of Integers to do a half matrix comparison. i.e. all comparisons
+	 * where i!=j and i>j
+	 * @param numMembers the total number of members to compare
+	 * @return the {@link JavaPairRDD} of the comparisons
+	 */
+	public static JavaPairRDD<Integer, Integer> getComparisonMatrix(int numMembers) {
+		JavaRDD<Integer> singleInt = getSparkContext().parallelize(Arrays.asList(numMembers));
+		JavaRDD<Integer> multipleInts = singleInt.flatMap(new FlatMapIntList());
+		JavaPairRDD<Integer, Integer> comparisons = multipleInts.flatMapToPair(new MapToPairs(numMembers));
+		return comparisons;
 	}
 }
