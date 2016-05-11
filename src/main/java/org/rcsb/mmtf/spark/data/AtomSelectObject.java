@@ -25,8 +25,14 @@ public class AtomSelectObject implements Serializable {
 	// TODO Make an ENUM
 	private String groupType;
 	
+
 	/**
-	 * Constructor to allow data to be input at constructions
+	 * Constructor for the atom select object that takes all the input
+	 * @param groupType a string specifying the type of the group
+	 * @param atomNameList the list of atoms to consider
+	 * @param groupNameList the list of groups to consider (e.g. LYS)
+	 * @param charged whether to consider charged atoms only (true)
+	 * @param elementNameList the list of elements to consider
 	 */
 	public AtomSelectObject(String[] atomNameList, String[] elementNameList, String[] groupNameList,
 			boolean charged,String groupType) {
