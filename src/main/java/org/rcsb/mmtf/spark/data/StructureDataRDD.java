@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.vecmath.Point3d;
 
@@ -17,8 +19,8 @@ import org.apache.spark.partial.PartialResult;
 import org.rcsb.mmtf.api.StructureDataInterface;
 import org.rcsb.mmtf.encoder.DefaultEncoder;
 import org.rcsb.mmtf.serialization.MessagePackSerialization;
-import org.rcsb.mmtf.spark.SparkUtils;
 import org.rcsb.mmtf.spark.mappers.GenerateSegments;
+import org.rcsb.mmtf.spark.utils.SparkUtils;
 
 import scala.Tuple2;
 
@@ -95,6 +97,24 @@ public class StructureDataRDD {
 	public StructureDataRDD(JavaPairRDD<String, StructureDataInterface> javaPairRDD) {
 		// Set the config for the spark context
 		this.javaPairRdd = javaPairRDD;
+	}
+
+	/**
+	 * Construtor from a list of PDB ids.
+	 * @param pdbIdList the input list of PDB ids
+	 * @throws IOException due to reading from the URL
+	 */
+	public StructureDataRDD(List<String> pdbIdList) throws IOException {
+		this.javaPairRdd = SparkUtils.getFromList(pdbIdList);
+	}
+	
+	/**
+	 * Construtor from an array of PDB ids.
+	 * @param pdbIdArray the input array of PDB ids
+	 * @throws IOException due to reading from the URL
+	 */
+	public StructureDataRDD(String[] pdbIdArray) throws IOException {
+		this.javaPairRdd = SparkUtils.getFromList(Arrays.asList(pdbIdArray));
 	}
 
 	/**

@@ -1,5 +1,7 @@
-package org.rcsb.mmtf.spark;
+package org.rcsb.mmtf.spark.utils;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -8,10 +10,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.zip.GZIPOutputStream;
 
 import javax.vecmath.Point3d;
@@ -19,6 +25,7 @@ import javax.vecmath.Point3d;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.spark.SparkConf;
@@ -297,18 +304,7 @@ public class SparkUtils {
 	 * @return the {@link SegmentDataRDD} of the calpha chains given the ids.
 	 */
 	public static SegmentDataRDD getCalphaChains(String[] inputIds) throws IOException {
-		// Load these structures
-		List<Tuple2<String, byte[]>> totalList = new ArrayList<>();
-		for(String pdbId : inputIds) {
-			totalList.add(new Tuple2<String, byte[]>(pdbId, getDataAsByteArray(pdbId)));
-		}
-		// Parrelise and return as RDD
-		StructureDataRDD structureDataRDD = new StructureDataRDD(getSparkContext().parallelizePairs(totalList)
-				.mapToPair(t -> new Tuple2<String, byte[]>(t._1.toString(), ReaderUtils.deflateGzip(t._2)))
-				// Roughly a minute 
-				.mapToPair(t -> new Tuple2<String, MmtfStructure>(t._1, new MessagePackSerialization().deserialize(new ByteArrayInputStream(t._2))))
-				.mapToPair(t -> new Tuple2<String, StructureDataInterface>(t._1,  new DefaultDecoder(t._2))));
-		return structureDataRDD.getCalpha();	
+		return new StructureDataRDD(inputIds).getCalpha();	
 	}
 
 
@@ -319,7 +315,7 @@ public class SparkUtils {
 	 * @return the gzip compressed byte array for this structure
 	 * @throws IOException  due to retrieving data from the URL
 	 */
-	private static byte[] getDataAsByteArray(String pdbCode) throws IOException {
+	public static byte[] getDataAsByteArray(String pdbCode) throws IOException {
 
 		// Get these as an inputstream
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -372,13 +368,137 @@ public class SparkUtils {
 		return comparisons;
 	}
 
+
+	/**
+	 * Join a Spark output dir of text files into a single text file.
+	 * @param folderPath the path the partitions are written in
+	 * @param header the  header for the top of the file
+	 * @throws IOException 
+	 */
+	public static void combineDirToFile(File dir, String header) throws IOException{
+		if(!dir.isDirectory()){
+			System.err.println(dir.getAbsolutePath()+" is not dir");
+			return;
+		}
+		File[] outList = Arrays.asList(dir.listFiles()).stream()
+				.filter(file -> Paths.get(file.getAbsolutePath()).getFileName().toString().startsWith("part"))
+				.toArray(size -> new File[size]);
+		File outFile = new File(dir.getAbsolutePath()+".txt");
+		outFile.delete();
+		joinFiles(outFile, outList, header);
+	}
+
+	/**
+	 * Join a list of files into a destination file
+	 * @param destination the destination path
+	 * @param sources the list of files to join together
+	 * @param header the header for the file
+	 * @throws IOException due to writing files to disk
+	 */
+	private static void joinFiles(File destination, File[] sources, String header) throws IOException {
+		OutputStream output = null;
+
+		try {
+			output = new BufferedOutputStream(new FileOutputStream(destination, true));
+			InputStream headerStream = null;
+			try{
+				headerStream = new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8));
+				IOUtils.copy(headerStream, output);
+			}
+			finally{
+				IOUtils.closeQuietly(headerStream);
+			}
+			for (File source : sources) {
+				appendFile(output, source);
+			}
+		} finally {
+			IOUtils.closeQuietly(output);
+		}
+	}
+
+	/**
+	 * Append a file to an output stream.
+	 * @param output the ouput stream
+	 * @param source the file to append
+	 * @throws IOException due to an error copying data
+	 */
+	private static void appendFile(OutputStream output, File source)
+			throws IOException {
+		InputStream input = null;
+		try {
+			input = new BufferedInputStream(new FileInputStream(source));
+			IOUtils.copy(input, output);
+		} finally {
+			IOUtils.closeQuietly(input);
+		}
+	}
+
 	/**
 	 * Get a half cartesian - using the first part of the input RDD as a string key.
-	 * @param <T> the type of the value
-	 * @param chainRDD the input rdd - keys are 
-	 * @return the complete RDD 
+	 * @param <K> the type of the value
+	 * @param <V> the type of the value
+	 * @param inputRDD the input rdd - keys are 
+	 * @return the RDD of all non-repated comparisons
 	 */
-	public static <T> JavaPairRDD<Tuple2<String, T>, Tuple2<String, T>> getHalfCartesian(JavaPairRDD<String, T> chainRDD) {
-		return chainRDD.cartesian(chainRDD).filter(t -> t._1._1.hashCode()>t._2._1.hashCode());
+	public static <K extends Comparable<K>,V> JavaPairRDD<Tuple2<K, V>, Tuple2<K, V>> getHalfCartesian(JavaPairRDD<K, V> inputRDD) {
+		return getHalfCartesian(inputRDD, 0);
+	}
+
+	/**
+	 * Get a half cartesian - using the first part of the input RDD as a string key.
+	 * @param <K> the type of the value
+	 * @param <V> the type of the value
+	 * @param inputRDD the input rdd - keys are 
+	 * @param numPartitions the number of partitions to repartition
+	 * @return the RDD of all non-repated comparisons
+	 */
+	public static <K extends Comparable<K>,V> JavaPairRDD<Tuple2<K, V>, Tuple2<K, V>> getHalfCartesian(JavaPairRDD<K, V> inputRDD, int numPartitions) {
+		JavaPairRDD<Tuple2<K, V>, Tuple2<K, V>> filteredRDD = inputRDD
+				.cartesian(inputRDD)
+				.filter(t -> t._1._1.compareTo(t._2._1)>0);
+		// If there is partitions
+		if (numPartitions!=0) {
+			return filteredRDD.repartition(numPartitions);
+		}
+		// If not then just return it un re-partitoned
+		return filteredRDD;
+		
+	}
+	
+	/**
+	 * Generate a {@link JavaPairRDD} of String (PDB ID) and Value {@link StructureDataInterface} from a list of PDB ids
+	 * @param pdbIdList the list of PDB ids
+	 * @return the {@link JavaPairRDD} of String and {@link StructureDataInterface}
+	 * @throws IOException due to reading from the URL
+	 */
+	public static JavaPairRDD<String, StructureDataInterface> getFromList(List<String> pdbIdList) throws IOException {
+		// Load these structures
+		List<Tuple2<String, byte[]>> totalList = new ArrayList<>();
+		for(String pdbId : pdbIdList) {
+			totalList.add(new Tuple2<String, byte[]>(pdbId, SparkUtils.getDataAsByteArray(pdbId)));
+		}
+		// Parrelise and return as RDD
+		return SparkUtils.getSparkContext().parallelizePairs(totalList)
+				.mapToPair(t -> new Tuple2<String, byte[]>(t._1.toString(), ReaderUtils.deflateGzip(t._2)))
+				// Roughly a minute 
+				.mapToPair(t -> new Tuple2<String, MmtfStructure>(t._1, new MessagePackSerialization().deserialize(new ByteArrayInputStream(t._2))))
+				.mapToPair(t -> new Tuple2<String, StructureDataInterface>(t._1,  new DefaultDecoder(t._2)));	
+		
+	}
+
+	/**
+	 * Take an RDD and place indices for every key.
+	 * @param inputRDD the input RDD
+	 * @return the List of key-index pairs
+	 */
+	public static <K,V> TwoWayHashmap<K, Integer> getKeysToIndices(JavaPairRDD<K, V> inputRDD) {
+		// Collect the chain names as a key
+		List<K> chainList = inputRDD.map(t -> t._1).collect();
+		TwoWayHashmap<K, Integer> twoWayHashmap = new TwoWayHashmap<>();
+		IntStream.range(0, chainList.size()).mapToObj(i -> new Tuple2<K,Integer>(chainList.get(i),i)).forEach(t -> {
+			twoWayHashmap.add(t._1, t._2);
+		});
+		return twoWayHashmap;
+
 	}
 }

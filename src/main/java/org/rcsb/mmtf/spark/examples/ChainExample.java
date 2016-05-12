@@ -3,8 +3,8 @@ package org.rcsb.mmtf.spark.examples;
 import java.io.IOException;
 
 import org.apache.spark.api.java.JavaDoubleRDD;
-import org.rcsb.mmtf.spark.SparkUtils;
 import org.rcsb.mmtf.spark.data.SegmentDataRDD;
+import org.rcsb.mmtf.spark.utils.SparkUtils;
 
 /**
  * An example of taking a list of PDB IDs, pulling them from the MMTF server and 
