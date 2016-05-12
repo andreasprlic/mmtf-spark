@@ -30,11 +30,12 @@ import org.rcsb.mmtf.dataholders.MmtfStructure;
 import org.rcsb.mmtf.decoder.DefaultDecoder;
 import org.rcsb.mmtf.decoder.ReaderUtils;
 import org.rcsb.mmtf.serialization.MessagePackSerialization;
+import org.rcsb.mmtf.spark.mappers.FlatMapIntList;
+import org.rcsb.mmtf.spark.mappers.MapToPairs;
 import org.rcsb.mmtf.spark.data.AtomSelectObject;
 import org.rcsb.mmtf.spark.data.SegmentDataRDD;
 import org.rcsb.mmtf.spark.data.StructureDataRDD;
-import org.rcsb.mmtf.spark.mappers.FlatMapIntList;
-import org.rcsb.mmtf.spark.mappers.MapToPairs;
+
 import org.rcsb.mmtf.utils.CodecUtils;
 
 import scala.Tuple2;
@@ -71,7 +72,7 @@ public class SparkUtils {
 				// Roughly a minute
 				.mapToPair(t -> new Tuple2<String, StructureDataInterface>(t._1,  new DefaultDecoder(t._2)));
 	}
-	
+
 	/**
 	 * Get the {@link StructureDataRDD} from a file path.
 	 * @param filePath the input file path
@@ -287,8 +288,8 @@ public class SparkUtils {
 		}
 		tarInputStream.close();
 	}
-	
-	
+
+
 	/**
 	 * Get the Calpha chains for a few structures as a SegmentDataRDD.
 	 * @param inputIds the list of input ids as strings
@@ -309,8 +310,8 @@ public class SparkUtils {
 				.mapToPair(t -> new Tuple2<String, StructureDataInterface>(t._1,  new DefaultDecoder(t._2))));
 		return structureDataRDD.getCalpha();	
 	}
-	
-	
+
+
 	/**
 	 * Helper function to get the data for a PDB id as an gzip compressed byte array.
 	 * Data is retrieved from the REST service. This should be moved to mmtf for the next release.
@@ -319,7 +320,7 @@ public class SparkUtils {
 	 * @throws IOException  due to retrieving data from the URL
 	 */
 	private static byte[] getDataAsByteArray(String pdbCode) throws IOException {
-		
+
 		// Get these as an inputstream
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		InputStream is = null;
@@ -336,7 +337,7 @@ public class SparkUtils {
 		}
 		return baos.toByteArray();
 	}
-	
+
 	/**
 	 * Utility function to generate an {@link AtomSelectObject}. 
 	 * Mainly for application to the Python API.
@@ -344,14 +345,17 @@ public class SparkUtils {
 	 * @param groupNameList the list of groups to consider (e.g. LYS)
 	 * @param charged whether to consider charged atoms only (true)
 	 * @param elementNameList the list of elements to consider
+	 * @param groupType a string defining the type of group
 	 * @return an atom select object of the appropriate type.
 	 */
 	public AtomSelectObject generateAtomSelectObject(List<String> atomNameList, 
-			List<String> groupNameList, boolean charged, List<String> elementNameList) {
+			List<String> groupNameList, boolean charged, List<String> elementNameList,
+			String groupType) {
 		return new AtomSelectObject()
 				.atomNameList(atomNameList)
 				.charged(charged)
 				.groupNameList(groupNameList)
+				.groupType(groupType)
 				.elementNameList(elementNameList);
 	}
 
@@ -366,5 +370,15 @@ public class SparkUtils {
 		JavaRDD<Integer> multipleInts = singleInt.flatMap(new FlatMapIntList());
 		JavaPairRDD<Integer, Integer> comparisons = multipleInts.flatMapToPair(new MapToPairs(numMembers));
 		return comparisons;
+	}
+
+	/**
+	 * Get a half cartesian - using the first part of the input RDD as a string key.
+	 * @param <T> the type of the value
+	 * @param chainRDD the input rdd - keys are 
+	 * @return the complete RDD 
+	 */
+	public static <T> JavaPairRDD<Tuple2<String, T>, Tuple2<String, T>> getHalfCartesian(JavaPairRDD<String, T> chainRDD) {
+		return chainRDD.cartesian(chainRDD).filter(t -> t._1._1.hashCode()>t._2._1.hashCode());
 	}
 }
