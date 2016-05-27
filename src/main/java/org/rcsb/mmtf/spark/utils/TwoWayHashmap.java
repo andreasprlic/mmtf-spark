@@ -19,7 +19,7 @@ public class TwoWayHashmap<K extends Object, V extends Object> implements Serial
 
 	private static final long serialVersionUID = 7258753696587988372L;
 	private Map<K,V> forward = new Hashtable<K, V>();
-	  private Map<V,K> backward = new Hashtable<V, K>();
+	private Map<V,K> backward = new Hashtable<V, K>();
 
 	  /**
 	   * Add a new key value pair

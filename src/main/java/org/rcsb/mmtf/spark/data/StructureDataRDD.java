@@ -18,6 +18,7 @@ import org.apache.spark.partial.BoundedDouble;
 import org.apache.spark.partial.PartialResult;
 import org.rcsb.mmtf.api.StructureDataInterface;
 import org.rcsb.mmtf.encoder.DefaultEncoder;
+import org.rcsb.mmtf.encoder.ReducedEncoder;
 import org.rcsb.mmtf.serialization.MessagePackSerialization;
 import org.rcsb.mmtf.spark.mappers.GenerateSegments;
 import org.rcsb.mmtf.spark.utils.SparkUtils;
@@ -62,10 +63,9 @@ public class StructureDataRDD {
 		String filePath = SparkUtils.getFilePath();
 		if(filePath==null){
 			// First try the full
-			System.out.println(SparkUtils.getFullPdbFile());
 			if(SparkUtils.getFullPdbFile()!=null && new File(SparkUtils.getFullPdbFile()).exists()) {
-				javaPairRdd = SparkUtils.getStructureDataRdd(SparkUtils.getFullPdbFile());
 				System.out.println("Using full PDB data.");
+				javaPairRdd = SparkUtils.getStructureDataRdd(SparkUtils.getFullPdbFile());
 			}
 			else{
 				URL inputPath = SparkUtils.class.getClassLoader().getResource("hadoop/subset");
@@ -100,7 +100,7 @@ public class StructureDataRDD {
 	}
 
 	/**
-	 * Construtor from a list of PDB ids.
+	 * Constructor from a list of PDB ids.
 	 * @param pdbIdList the input list of PDB ids
 	 * @throws IOException due to reading from the URL
 	 */
@@ -152,6 +152,15 @@ public class StructureDataRDD {
 	public SegmentDataRDD getCalpha() {	
 		return new SegmentDataRDD(javaPairRdd
 				.flatMapToPair(new GenerateSegments(null)));
+	}
+	
+	/**
+	 * Covert the {@link StructureDataRDD} to the reduced format.
+	 * @return the {@link StructureDataRDD} of the reduced format
+	 */
+	public StructureDataRDD getReduced() {
+		JavaPairRDD<String, StructureDataInterface> reduced = javaPairRdd.mapToPair(t -> new Tuple2<String, StructureDataInterface>(t._1, ReducedEncoder.getReduced(t._2)));
+		return new StructureDataRDD(reduced);
 	}
 	
 	/**

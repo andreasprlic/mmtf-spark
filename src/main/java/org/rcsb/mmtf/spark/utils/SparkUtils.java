@@ -32,6 +32,9 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoders;
+import org.apache.spark.sql.SQLContext;
 import org.rcsb.mmtf.api.StructureDataInterface;
 import org.rcsb.mmtf.dataholders.MmtfStructure;
 import org.rcsb.mmtf.decoder.DefaultDecoder;
@@ -46,6 +49,7 @@ import org.rcsb.mmtf.spark.data.StructureDataRDD;
 import org.rcsb.mmtf.utils.CodecUtils;
 
 import scala.Tuple2;
+import scala.reflect.ClassTag;
 
 /**
  * A class of Spark utility methods
@@ -58,11 +62,27 @@ public class SparkUtils {
 	private static String hadoopFilePath = null;
 	private static SparkConf conf = null;
 	private static JavaSparkContext javaSparkContext = null;
+	private static SQLContext sqlContext = null;
 	/** Where to get the data from. */
 	public static final String URL_LOCATION = "http://mmtf.rcsb.org/v0/hadoopfiles/full.tar";
 	private static final String hadoopBase = "/hadoop/v0";
 	private static final String pdbFileName = "full";
 	private static final String tarFileName = "full.tar";
+
+
+
+	/**
+	 * Convert a {@link JavaRDD} to a {@link Dataset} of the same type.
+	 * @param javaRDD the input {@link JavaRDD}
+	 * @param clazz the input class of the RDD
+	 * @return the converted dataset
+	 */
+	public static <T> Dataset<T> convertToDataset(JavaRDD<T> javaRDD, Class<T> clazz) {
+		SQLContext sqlContext = getSqlContext();
+		return sqlContext.createDataset(JavaRDD.toRDD(javaRDD), Encoders.bean(clazz));
+	}
+
+
 
 	/**
 	 * Get an {@link JavaPairRDD} of {@link String} {@link StructureDataInterface} from a file path.
@@ -114,6 +134,17 @@ public class SparkUtils {
 		return javaSparkContext;
 	}
 
+	/**
+	 * Get the {@link SQLContext} for producing datasets and data frames.
+	 * @return the {@link SQLContext}.
+	 */
+	public static SQLContext getSqlContext() {
+		if(sqlContext==null){
+			sqlContext = new SQLContext(getSparkContext());
+		}
+		return sqlContext;
+	}
+
 
 	/**
 	 * Get the {@link JavaSparkContext} for this run.
@@ -140,26 +171,6 @@ public class SparkUtils {
 	 */
 	public static void filePath(String filePath) {
 		hadoopFilePath = filePath;
-	}
-
-
-
-	/**
-	 * Get the type of a given chain index.
-	 * @param structureDataInterface the input {@link StructureDataInterface}
-	 * @param chainInd the index of the relevant chain
-	 * @return the {@link String} describing the chain 
-	 */
-	public static String getType(StructureDataInterface structureDataInterface, int chainInd) {
-		for(int i=0; i<structureDataInterface.getNumEntities(); i++){
-			for(int chainIndex : structureDataInterface.getEntityChainIndexList(i)){
-				if(chainInd==chainIndex){
-					return structureDataInterface.getEntityType(i);
-				}
-			}
-		}
-		System.err.println("ERROR FINDING ENTITY FOR CHAIN: "+chainInd);
-		return "NULL";
 	}
 
 	/**
@@ -462,9 +473,9 @@ public class SparkUtils {
 		}
 		// If not then just return it un re-partitoned
 		return filteredRDD;
-		
+
 	}
-	
+
 	/**
 	 * Generate a {@link JavaPairRDD} of String (PDB ID) and Value {@link StructureDataInterface} from a list of PDB ids
 	 * @param pdbIdList the list of PDB ids
@@ -483,8 +494,9 @@ public class SparkUtils {
 				// Roughly a minute 
 				.mapToPair(t -> new Tuple2<String, MmtfStructure>(t._1, new MessagePackSerialization().deserialize(new ByteArrayInputStream(t._2))))
 				.mapToPair(t -> new Tuple2<String, StructureDataInterface>(t._1,  new DefaultDecoder(t._2)));	
-		
+
 	}
+
 
 	/**
 	 * Take an RDD and place indices for every key.
@@ -500,5 +512,17 @@ public class SparkUtils {
 		});
 		return twoWayHashmap;
 
+	}
+
+
+	/**
+	 * Get a {@link JavaRDD} from a {@link Dataset}.
+	 * @param atomDataset the dataset to convert
+	 * @param class1 the class of the dataset
+	 * @return the {@link JavaRDD} fromn the dataset
+	 */
+	public static <T> JavaRDD<T> getJavaRdd(Dataset<T> atomDataset, Class<T> class1) {
+		ClassTag<T> classTag = scala.reflect.ClassTag$.MODULE$.apply(class1);
+		return new JavaRDD<T>(atomDataset.rdd(), classTag);
 	}
 }

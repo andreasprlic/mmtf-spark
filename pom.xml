@@ -37,6 +37,7 @@
 		<maxmem>512M</maxmem>
 		<slf4j.version>1.7.21</slf4j.version>
 		<log4j.version>2.5</log4j.version>
+		<mmtf.version>0.2.0-SNAPSHOT</mmtf.version>
 	</properties>
 
 	<scm>
@@ -56,22 +57,17 @@
 		<dependency>
 			<groupId>org.rcsb</groupId>
 			<artifactId>mmtf-api</artifactId>
-			<version>0.1.0</version>
+			<version>${mmtf.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.rcsb</groupId>
 			<artifactId>mmtf-serialization</artifactId>
-			<version>0.1.0</version>
+			<version>${mmtf.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.rcsb</groupId>
-			<artifactId>mmtf-decoder</artifactId>
-			<version>0.1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.rcsb</groupId>
-			<artifactId>mmtf-encoder</artifactId>
-			<version>0.1.0</version>
+			<artifactId>mmtf-codec</artifactId>
+			<version>${mmtf.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>uk.co.jemos.podam</groupId>
