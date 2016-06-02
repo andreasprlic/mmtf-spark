@@ -17,7 +17,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.partial.BoundedDouble;
 import org.apache.spark.partial.PartialResult;
 import org.rcsb.mmtf.api.StructureDataInterface;
-import org.rcsb.mmtf.encoder.DefaultEncoder;
+import org.rcsb.mmtf.encoder.GenericEncoder;
 import org.rcsb.mmtf.encoder.ReducedEncoder;
 import org.rcsb.mmtf.serialization.MessagePackSerialization;
 import org.rcsb.mmtf.spark.mappers.GenerateSegments;
@@ -205,7 +205,7 @@ public class StructureDataRDD {
 		javaPairRdd
 		.mapToPair( t -> {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			new  MessagePackSerialization().serialize(new DefaultEncoder(t._2).getMmtfEncodedStructure(), bos);
+			new  MessagePackSerialization().serialize(new GenericEncoder(t._2).getMmtfEncodedStructure(), bos);
 			return new Tuple2<String, byte[]>(t._1, SparkUtils.gzipCompress(
 					bos.toByteArray()));
 		})

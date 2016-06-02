@@ -37,7 +37,7 @@ import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.SQLContext;
 import org.rcsb.mmtf.api.StructureDataInterface;
 import org.rcsb.mmtf.dataholders.MmtfStructure;
-import org.rcsb.mmtf.decoder.DefaultDecoder;
+import org.rcsb.mmtf.decoder.GenericDecoder;
 import org.rcsb.mmtf.decoder.ReaderUtils;
 import org.rcsb.mmtf.serialization.MessagePackSerialization;
 import org.rcsb.mmtf.spark.mappers.FlatMapIntList;
@@ -97,7 +97,7 @@ public class SparkUtils {
 				// Roughly a minute 
 				.mapToPair(t -> new Tuple2<String, MmtfStructure>(t._1, new MessagePackSerialization().deserialize(new ByteArrayInputStream(t._2))))
 				// Roughly a minute
-				.mapToPair(t -> new Tuple2<String, StructureDataInterface>(t._1,  new DefaultDecoder(t._2)));
+				.mapToPair(t -> new Tuple2<String, StructureDataInterface>(t._1,  new GenericDecoder(t._2)));
 	}
 
 	/**
@@ -493,7 +493,7 @@ public class SparkUtils {
 				.mapToPair(t -> new Tuple2<String, byte[]>(t._1.toString(), ReaderUtils.deflateGzip(t._2)))
 				// Roughly a minute 
 				.mapToPair(t -> new Tuple2<String, MmtfStructure>(t._1, new MessagePackSerialization().deserialize(new ByteArrayInputStream(t._2))))
-				.mapToPair(t -> new Tuple2<String, StructureDataInterface>(t._1,  new DefaultDecoder(t._2)));	
+				.mapToPair(t -> new Tuple2<String, StructureDataInterface>(t._1,  new GenericDecoder(t._2)));	
 
 	}
 
