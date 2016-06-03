@@ -382,7 +382,7 @@ public class SparkUtils {
 
 	/**
 	 * Join a Spark output dir of text files into a single text file.
-	 * @param folderPath the path the partitions are written in
+	 * @param dir the file the partitions are written to
 	 * @param header the  header for the top of the file
 	 * @throws IOException an error joining the files
 	 */
