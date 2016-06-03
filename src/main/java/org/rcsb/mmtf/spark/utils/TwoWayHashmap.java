@@ -11,8 +11,8 @@ import java.util.Map;
  *
  *From here: http://stackoverflow.com/questions/3430170/how-to-create-a-2-way-map-in-java
  *
- * @param <K>
- * @param <V>
+ * @param <K> the key parameter type
+ * @param <V> the value parameter type
  */
 public class TwoWayHashmap<K extends Object, V extends Object> implements Serializable {
 
