@@ -17,7 +17,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 import java.util.zip.GZIPOutputStream;
 
 import javax.vecmath.Point3d;
@@ -75,6 +74,7 @@ public class SparkUtils {
 	 * Convert a {@link JavaRDD} to a {@link Dataset} of the same type.
 	 * @param javaRDD the input {@link JavaRDD}
 	 * @param clazz the input class of the RDD
+	 * @param <T> the type of the RDD
 	 * @return the converted dataset
 	 */
 	public static <T> Dataset<T> convertToDataset(JavaRDD<T> javaRDD, Class<T> clazz) {
@@ -285,7 +285,7 @@ public class SparkUtils {
 	 * Untar a folder to the path.
 	 * @param destinationFolder the folder to write to
 	 * @param tarInputStream the {@link TarArchiveInputStream} input
-	 * @throws IOException
+	 * @throws IOException an error moving the file
 	 */
 	private static void untar(String destinationFolder, TarArchiveInputStream tarInputStream) throws IOException {
 		System.out.println("Untarring PDB...");
@@ -384,7 +384,7 @@ public class SparkUtils {
 	 * Join a Spark output dir of text files into a single text file.
 	 * @param folderPath the path the partitions are written in
 	 * @param header the  header for the top of the file
-	 * @throws IOException 
+	 * @throws IOException an error joining the files
 	 */
 	public static void combineDirToFile(File dir, String header) throws IOException{
 		if(!dir.isDirectory()){
@@ -499,26 +499,10 @@ public class SparkUtils {
 
 
 	/**
-	 * Take an RDD and place indices for every key.
-	 * @param inputRDD the input RDD
-	 * @return the List of key-index pairs
-	 */
-	public static <K,V> TwoWayHashmap<K, Integer> getKeysToIndices(JavaPairRDD<K, V> inputRDD) {
-		// Collect the chain names as a key
-		List<K> chainList = inputRDD.map(t -> t._1).collect();
-		TwoWayHashmap<K, Integer> twoWayHashmap = new TwoWayHashmap<>();
-		IntStream.range(0, chainList.size()).mapToObj(i -> new Tuple2<K,Integer>(chainList.get(i),i)).forEach(t -> {
-			twoWayHashmap.add(t._1, t._2);
-		});
-		return twoWayHashmap;
-
-	}
-
-
-	/**
 	 * Get a {@link JavaRDD} from a {@link Dataset}.
 	 * @param atomDataset the dataset to convert
 	 * @param class1 the class of the dataset
+	 * @param <T> the type of the dataset
 	 * @return the {@link JavaRDD} fromn the dataset
 	 */
 	public static <T> JavaRDD<T> getJavaRdd(Dataset<T> atomDataset, Class<T> class1) {
