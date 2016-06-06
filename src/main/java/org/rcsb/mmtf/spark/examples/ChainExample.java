@@ -1,9 +1,10 @@
-package org.rcsb.mmtf.spark.examples;
+	package org.rcsb.mmtf.spark.examples;
 
 import java.io.IOException;
 
 import org.apache.spark.api.java.JavaDoubleRDD;
 import org.rcsb.mmtf.spark.data.SegmentDataRDD;
+import org.rcsb.mmtf.spark.data.StructureDataRDD;
 import org.rcsb.mmtf.spark.utils.SparkUtils;
 
 /**
@@ -21,7 +22,9 @@ public class ChainExample {
 	 * @throws IOException due to an error reading from the URL
 	 */
 	public static void main(String[] args) throws IOException {
-		SegmentDataRDD calphaChains = SparkUtils.getCalphaChains(new String[] {"1AQ1", "4CUP"}).filterMinLength(10);
+		StructureDataRDD structureDataRDD = new StructureDataRDD("/path/to/file");
+		SegmentDataRDD calphaChains = structureDataRDD.getCalpha().filterLength(10, 300);
+		 SparkUtils.getCalphaChains(new String[] {"1AQ1", "4CUP"}).filterMinLength(10);
 		JavaDoubleRDD lengthDist = calphaChains.getLengthDist().cache();
 		System.out.println(lengthDist.mean());
 		System.out.println(lengthDist.min());

@@ -2,7 +2,7 @@
 In this module we provide APIs and  examples of using Apache Spark, MMTF and Hadoop for high-performance structural bioinformatics.
 
 # Examples of use
-## First download and untar a Hadoop sequence file of the PDB (~7 GB download) 
+### First download and untar a Hadoop sequence file of the PDB (~7 GB download) 
 ```
 wget http://mmtf.rcsb.org/v0.2/hadoopfiles/full.tar
 tar -xvf full.tar
@@ -12,7 +12,7 @@ Or you can get a C-alpha, phosphate, ligand only version (~800 Mb download)
 wget http://mmtf.rcsb.org/v0.2/hadoopfiles/reduced.tar
 tar -xvf reduced.tar
 ```
-## Second add the mmtf-spark dependecy to your pom
+### Second add the mmtf-spark dependecy to your pom
 
 ```xml
 		<dependency>
@@ -24,12 +24,17 @@ tar -xvf reduced.tar
 
 
 # Analysis
-## We can split either file into C-alpha protein chains
+### You can split either file into C-alpha protein chains
 ```
-SegmentDataRDD calphaChains = SparkUtils.getCalphaChains("/path/to/hadoopfolder").filterMinLength(10);
+StructureDataRDD structureDataRDD = new StructureDataRDD("/path/to/hadoopfolder");
+SegmentDataRDD calphaChains = structureDataRDD.getCalpha().filterLength(10, 300);
+JavaDoubleRDD lengthDist = calphaChains.getLengthDist().cache();
+System.out.println("Mean chain length is:"+lengthDist.mean());
 ```
 
-## Or you can fragment the protein into continuous overlapping fragments
+### Or you can fragment the protein into continuous overlapping fragments of length 8 
 ```
-SegmentClusters fragClusters = new StructureDataRDD("/path/to/hadoopfolder").getFragments(8).groupBySequence();
+StructureDataRDD structureDataRDD = new StructureDataRDD("/path/to/hadoopfolder").getFragments(8);
+SegmentClusters fragClusters = structureDataRDD.groupBySequence();
+System.out.println(fragClusters.size());
 ```
