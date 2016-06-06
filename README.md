@@ -32,7 +32,7 @@ tar -xvf reduced.tar
 ### You can split this into C-alpha protein chains
 ```
 		// Filter lenghts of between 10 and 300
-		SegmentDataRDD calphaChains = structureDataRDD.getCalpha().filterLength(10, 300);
+		SegmentDataRDD calphaChains = structureData.getCalpha().filterLength(10, 300);
 		// And analyse their lengths
 		JavaDoubleRDD lengthDist = calphaChains.getLengthDist().cache();
 		System.out.println("Mean chain length is:"+lengthDist.mean());
