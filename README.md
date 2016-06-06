@@ -26,15 +26,18 @@ tar -xvf reduced.tar
 # Analysis
 ### You can split either file into C-alpha protein chains
 ```
-StructureDataRDD structureDataRDD = new StructureDataRDD("/path/to/hadoopfolder");
-SegmentDataRDD calphaChains = structureDataRDD.getCalpha().filterLength(10, 300);
-JavaDoubleRDD lengthDist = calphaChains.getLengthDist().cache();
-System.out.println("Mean chain length is:"+lengthDist.mean());
+		StructureDataRDD structureDataRDD = new StructureDataRDD("/path/to/hadoopfolder");
+		// Filter lenghts of between 10 and 300
+		SegmentDataRDD calphaChains = structureDataRDD.getCalpha().filterLength(10, 300);
+		// And analyse their lengths
+		JavaDoubleRDD lengthDist = calphaChains.getLengthDist().cache();
+		System.out.println("Mean chain length is:"+lengthDist.mean());
 ```
 
 ### Or you can fragment the protein into continuous overlapping fragments of length 8 
 ```
-StructureDataRDD structureDataRDD = new StructureDataRDD("/path/to/hadoopfolder").getFragments(8);
-SegmentClusters fragClusters = structureDataRDD.groupBySequence();
-System.out.println(fragClusters.size());
+		StructureDataRDD structureDataRDD = new StructureDataRDD("/path/to/hadoopfolder");
+		SegmentDataRDD framgents = structureDataRDD.getFragments(8);
+		SegmentClusters fragClusters =  framgents.groupBySequence();
+		System.out.println("Number of different sequences of length 8: "+fragClusters.size());
 ```

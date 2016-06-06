@@ -1,6 +1,7 @@
 package org.rcsb.mmtf.spark.examples;
 
 import org.rcsb.mmtf.spark.data.SegmentClusters;
+import org.rcsb.mmtf.spark.data.SegmentDataRDD;
 import org.rcsb.mmtf.spark.data.StructureDataRDD;
 
 /**
@@ -16,9 +17,10 @@ public class FragmentExample {
 	 * @param args the arguments for the function
 	 */
 	public static void main(String[] args) {		
-		new StructureDataRDD().getCalpha();
-		SegmentClusters fragClusters = new StructureDataRDD().getFragments(8).groupBySequence();
-		System.out.println(fragClusters.size());
+		StructureDataRDD structureDataRDD = new StructureDataRDD("/path/to/hadoopfolder");
+		SegmentDataRDD framgents = structureDataRDD.getFragments(8);
+		SegmentClusters fragClusters =  framgents.groupBySequence();
+        System.out.println("Number of different sequences of length 8: "+fragClusters.size());
 	}
 	
 }
