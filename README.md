@@ -29,11 +29,8 @@ tar -xvf reduced.tar
 		StructureDataRDD structureData = new StructureDataRDD("/path/to/hadoopfolder");
 ```
 
-### You can split this into C-alpha protein chains
-```
-		// Filter lenghts of between 10 and 300
+### You can split this into C-alpha protein chains of fixed langths
 		SegmentDataRDD calphaChains = structureData.getCalpha().filterLength(10, 300);
-		// And analyse their lengths
 		JavaDoubleRDD lengthDist = calphaChains.getLengthDist().cache();
 		System.out.println("Mean chain length is:"+lengthDist.mean());
 ```
