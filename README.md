@@ -24,9 +24,13 @@ tar -xvf reduced.tar
 
 
 # Analysis
-### You can split either file into C-alpha protein chains
+### First parse the data (changing the path to your file - either reduced or full).
 ```
-		StructureDataRDD structureDataRDD = new StructureDataRDD("/path/to/hadoopfolder");
+		StructureDataRDD structureData = new StructureDataRDD("/path/to/hadoopfolder");
+```
+
+### You can split this into C-alpha protein chains
+```
 		// Filter lenghts of between 10 and 300
 		SegmentDataRDD calphaChains = structureDataRDD.getCalpha().filterLength(10, 300);
 		// And analyse their lengths
@@ -36,8 +40,7 @@ tar -xvf reduced.tar
 
 ### Or you can fragment the protein into continuous overlapping fragments of length 8 
 ```
-		StructureDataRDD structureDataRDD = new StructureDataRDD("/path/to/hadoopfolder");
-		SegmentDataRDD framgents = structureDataRDD.getFragments(8);
+		SegmentDataRDD framgents = structureData.getFragments(8);
 		SegmentClusters fragClusters =  framgents.groupBySequence();
 		System.out.println("Number of different sequences of length 8: "+fragClusters.size());
 ```
