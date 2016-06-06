@@ -182,7 +182,7 @@ public class SparkUtils {
 	 */
 	public static Point3d getCalpha(StructureDataInterface structureDataInterface, int groupType, int atomCounter) {
 		for(int i=0; i<structureDataInterface.getNumAtomsInGroup(groupType);i++){
-			if(structureDataInterface.getGroupAtomNames(groupType)[i].equals("CA")){
+			if(structureDataInterface.getGroupAtomNames(groupType)[i].equals("CA") && structureDataInterface.getGroupElementNames(groupType)[i].equals("C")){
 				Point3d point3d = new Point3d();
 				point3d.x = structureDataInterface.getxCoords()[atomCounter+i];
 				point3d.y = structureDataInterface.getyCoords()[atomCounter+i]; 

@@ -16,8 +16,8 @@ public class FragmentExample {
 	 * @param args the arguments for the function
 	 */
 	public static void main(String[] args) {		
-		SegmentClusters fragCLusters = new StructureDataRDD().getFragments(8).groupBySequence();
-		System.out.println(fragCLusters.size());
+		SegmentClusters fragClusters = new StructureDataRDD().getFragments(8).groupBySequence();
+		System.out.println(fragClusters.size());
 	}
 	
 }
