@@ -25,7 +25,7 @@ public class MmtfStructureData {
 	
 	/**
 	 * Constructor from am RDD
-	 * @param inputPath the input path of the Hadoop sequence file to read
+	 * @param inputRdd the input {@link JavaPairRDD} to use
 	 */
 	public MmtfStructureData(JavaPairRDD<String, MmtfStructure> inputRdd) {
 		javaPairRdd = inputRdd;
