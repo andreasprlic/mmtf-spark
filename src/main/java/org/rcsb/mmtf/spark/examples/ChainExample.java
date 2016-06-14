@@ -21,13 +21,15 @@ public class ChainExample {
 	 * @throws IOException due to an error reading from the URL
 	 */
 	public static void main(String[] args) throws IOException {
-		StructureDataRDD structureDataRDD = new StructureDataRDD("/path/to/file");
+		long start = System.currentTimeMillis();
+		StructureDataRDD structureDataRDD = new StructureDataRDD("/path/to/hadoopfolder");
 		SegmentDataRDD calphaChains = structureDataRDD.getCalpha().filterLength(10, 300);
 		JavaDoubleRDD lengthDist = calphaChains.getLengthDist().cache();
 		System.out.println(lengthDist.mean());
 		System.out.println(lengthDist.min());
 		System.out.println(lengthDist.max());
 		System.out.println(lengthDist.count());	
+		System.out.println(System.currentTimeMillis()-start);
 	}
 
 }

@@ -14,8 +14,11 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
@@ -90,15 +93,26 @@ public class SparkUtils {
 	 * @return the {@link JavaPairRDD} of {@link String} {@link StructureDataInterface}
 	 */
 	public static JavaPairRDD<String, StructureDataInterface> getStructureDataRdd(String filePath) {
+		return getMmtfStructureRdd(filePath)
+				// Roughly a minute
+				.mapToPair(t -> new Tuple2<String, StructureDataInterface>(t._1,  new GenericDecoder(t._2)));
+	}
+
+	/**
+	 * Get a {@link JavaPairRDD} of {@link String} {@link MmtfStructure} from a file path
+	 * @param filePath the input path to the hadoop sequence file
+	 * @return the {@link JavaPairRDD} of {@link String} {@link MmtfStructure}
+	 */
+	public static JavaPairRDD<String, MmtfStructure> getMmtfStructureRdd(String filePath) {
 		return getSparkContext()
 				.sequenceFile(filePath, Text.class, BytesWritable.class, 8)
 				// Roughly thirty seconds
 				.mapToPair(t -> new Tuple2<String, byte[]>(t._1.toString(), ReaderUtils.deflateGzip(t._2.getBytes())))
 				// Roughly a minute 
-				.mapToPair(t -> new Tuple2<String, MmtfStructure>(t._1, new MessagePackSerialization().deserialize(new ByteArrayInputStream(t._2))))
-				// Roughly a minute
-				.mapToPair(t -> new Tuple2<String, StructureDataInterface>(t._1,  new GenericDecoder(t._2)));
+				.mapToPair(t -> new Tuple2<String, MmtfStructure>(t._1, new MessagePackSerialization().deserialize(new ByteArrayInputStream(t._2))));
 	}
+
+
 
 	/**
 	 * Get the {@link StructureDataRDD} from a file path.
@@ -508,5 +522,17 @@ public class SparkUtils {
 	public static <T> JavaRDD<T> getJavaRdd(Dataset<T> atomDataset, Class<T> class1) {
 		ClassTag<T> classTag = scala.reflect.ClassTag$.MODULE$.apply(class1);
 		return new JavaRDD<T>(atomDataset.rdd(), classTag);
+	}
+
+
+	/**
+	 * Parse the date as it is stored in the String.
+	 * @param releaseDate the input date as a string
+	 * @return the parsed date 
+	 * @throws ParseException an error in parsing the date
+	 */
+	public static Date parseDate(String releaseDate) throws ParseException{
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		return formatter.parse(releaseDate);
 	}
 }

@@ -224,5 +224,14 @@ public class StructureDataRDD {
 		return new StructureDataRDD(javaPairRdd.sample(false, fraction));
 	}
 
+	/**
+	 * Cache the underlying RDD.
+	 * @return the cached {@link StructureDataRDD}
+	 */
+	public StructureDataRDD cache() {
+		javaPairRdd.cache();
+		return this;
+	}
+
 
 }
