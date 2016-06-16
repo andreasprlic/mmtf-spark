@@ -3,12 +3,12 @@ In this module we provide APIs and  examples of using Apache Spark, MMTF and Had
 
 # Examples of use
 ### First download and untar a Hadoop sequence file of the PDB (~7 GB download) 
-```
+```bash
 wget http://mmtf.rcsb.org/v0.2/hadoopfiles/full.tar
 tar -xvf full.tar
 ```
 Or you can get a C-alpha, phosphate, ligand only version (~800 Mb download)
-```
+```bash
 wget http://mmtf.rcsb.org/v0.2/hadoopfiles/reduced.tar
 tar -xvf reduced.tar
 ```
@@ -25,19 +25,19 @@ tar -xvf reduced.tar
 
 # Analysis
 ### First parse the data (changing the path to your file - either reduced or full).
-```
+```java
 		StructureDataRDD structureData = new StructureDataRDD("/path/to/hadoopfolder");
 ```
 
 ### You can split this into C-alpha protein chains of fixed langths
-```
+```java
 		SegmentDataRDD calphaChains = structureData.getCalpha().filterLength(10, 300);
 		JavaDoubleRDD lengthDist = calphaChains.getLengthDist().cache();
 		System.out.println("Mean chain length is:"+lengthDist.mean());
 ```
 
 ### Or you can fragment the protein into continuous overlapping fragments of length 8 
-```
+```java
 		SegmentDataRDD framgents = structureData.getFragments(8);
 		SegmentClusters fragClusters =  framgents.groupBySequence();
 		System.out.println("Number of different sequences of length 8: "+fragClusters.size());
