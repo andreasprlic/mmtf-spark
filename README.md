@@ -18,7 +18,7 @@ tar -xvf reduced.tar
 		<dependency>
 			<groupId>org.rcsb</groupId>
 			<artifactId>mmtf-spark</artifactId>
-			<version>0.0.2</version>
+			<version>0.0.4</version>
 		</dependency>
 ```
 
