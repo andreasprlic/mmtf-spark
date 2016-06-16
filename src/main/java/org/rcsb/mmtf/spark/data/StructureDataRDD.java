@@ -14,8 +14,6 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.partial.BoundedDouble;
-import org.apache.spark.partial.PartialResult;
 import org.rcsb.mmtf.api.StructureDataInterface;
 import org.rcsb.mmtf.encoder.GenericEncoder;
 import org.rcsb.mmtf.encoder.ReducedEncoder;
