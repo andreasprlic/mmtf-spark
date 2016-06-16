@@ -41,21 +41,17 @@ public class GenerateSegments implements PairFlatMapFunction<Tuple2<String,Struc
 	public Iterable<Tuple2<String, Segment>> call(Tuple2<String, StructureDataInterface> t) throws Exception {
 		StructureDataInterface structureDataInterface = t._2;
 		List<Tuple2<String, Segment>> outList = new ArrayList<>();
-		// Get the PDB id
 		String pdbId = structureDataInterface.getStructureId();
-		Map<Integer,String> chainIndexToEntityTypeMap = getChainEntity(structureDataInterface);
+		Map<Integer,String> chainIndToEntityTypeMap = getChainIndToEntityTypeMap(structureDataInterface);
 		int atomCounter = 0;
 		int groupCounter = 0;
-		// Now loop through the entities
 		for(int i=0; i<structureDataInterface.getNumChains(); i++){
 			String chainId = pdbId+"."+structureDataInterface.getChainIds()[i];
-			if(chainIndexToEntityTypeMap.get(i)==null || chainIndexToEntityTypeMap.get(i).equals("polymer")){
+			if(chainIndToEntityTypeMap.get(i).equals("polymer")){
 				int fragCounter = 0;
-				// Loop over the group indices
 				List<Point3d> fragList = new ArrayList<>();
 				String sequence = "";
 				for(int groupId=0; groupId<structureDataInterface.getGroupsPerChain()[i]; groupId++){
-					// Now get the CA coord
 					int groupType = structureDataInterface.getGroupTypeIndices()[groupCounter];
 					Point3d point3d = getCalpha(structureDataInterface, groupType, atomCounter);
 					atomCounter+=structureDataInterface.getNumAtomsInGroup(groupType);
@@ -88,7 +84,7 @@ public class GenerateSegments implements PairFlatMapFunction<Tuple2<String,Struc
 	 * @param structureDataInterface the input {@link StructureDataInterface}
 	 * @return the map of chain indices to the entity type
 	 */
-	private Map<Integer,String> getChainEntity(StructureDataInterface structureDataInterface) {
+	private Map<Integer,String> getChainIndToEntityTypeMap(StructureDataInterface structureDataInterface) {
 		Map<Integer,String> outMap = new HashMap<>();
 		for(int i=0; i<structureDataInterface.getNumEntities(); i++) {
 			String type = structureDataInterface.getEntityType(i);
