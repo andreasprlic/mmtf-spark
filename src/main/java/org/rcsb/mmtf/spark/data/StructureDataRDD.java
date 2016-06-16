@@ -60,14 +60,12 @@ public class StructureDataRDD {
 	private void setupRdd() {
 		String filePath = SparkUtils.getFilePath();
 		if(filePath==null){
-			// First try the full
 			if(SparkUtils.getFullPdbFile()!=null && new File(SparkUtils.getFullPdbFile()).exists()) {
 				System.out.println("Using full PDB data.");
 				javaPairRdd = SparkUtils.getStructureDataRdd(SparkUtils.getFullPdbFile());
 			}
 			else{
 				URL inputPath = SparkUtils.class.getClassLoader().getResource("hadoop/subset");
-				// Set the config for the spark context
 				javaPairRdd = SparkUtils.getStructureDataRdd(inputPath.toString());
 				System.out.println("Full data not available");
 				System.out.println("Using small 1% subset");
@@ -83,7 +81,6 @@ public class StructureDataRDD {
 	 * @param inputPath the input path of the Hadoop sequence file to read
 	 */
 	public StructureDataRDD(String inputPath) {
-		// Set the config for the spark context
 		javaPairRdd = SparkUtils.getStructureDataRdd(inputPath);
 	}
 
@@ -93,7 +90,6 @@ public class StructureDataRDD {
 	 * {@link String} {@link StructureDataInterface}
 	 */
 	public StructureDataRDD(JavaPairRDD<String, StructureDataInterface> javaPairRDD) {
-		// Set the config for the spark context
 		this.javaPairRdd = javaPairRDD;
 	}
 

@@ -12,9 +12,6 @@ import org.apache.spark.api.java.function.FlatMapFunction;
  */
 public class FlatMapIntList implements FlatMapFunction<Integer,Integer> {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 6649798711352371580L;
 
 	@Override

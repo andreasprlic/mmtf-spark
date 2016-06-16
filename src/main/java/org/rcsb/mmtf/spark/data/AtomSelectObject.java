@@ -25,7 +25,6 @@ public class AtomSelectObject implements Serializable {
 	// TODO Make an ENUM
 	private String groupType;
 	
-
 	/**
 	 * Constructor for the atom select object that takes all the input
 	 * @param groupType a string specifying the type of the group
@@ -54,9 +53,7 @@ public class AtomSelectObject implements Serializable {
 		else{
 			this.groupNameList = new ArrayList<>();
 		}
-		// Charged must have a value
 		this.charged = charged;
-		// GroupType can be specified or null ->> Should be Enum
 		this.groupType = groupType;
 	}
 	
@@ -187,7 +184,5 @@ public class AtomSelectObject implements Serializable {
 		this.groupType = groupType;
 		return this;
 	}
-
-	
 	
 }
