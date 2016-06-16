@@ -184,18 +184,6 @@ public class StructureDataRDD {
 		return javaPairRdd
 				.count();
 	}
-	
-	/**
-	 * Get the number of entries in the RDD.
-	 * @return the {@link Long} number of entries
-	 */
-	public Long quickSize() {
-		PartialResult<BoundedDouble> result = javaPairRdd
-				.countApprox(1000);
-		return (long) Integer.parseInt(
-				Double.toString(result.getFinalValue().mean()));
-	}
-
 
 	/**
 	 * Save the data as a Hadoop sequence file.
