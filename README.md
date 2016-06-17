@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/rcsb/mmtf-spark.svg?branch=master)](https://travis-ci.org/rcsb/mmtf-spark)
 [![Version](http://img.shields.io/badge/version-0.0.4-blue.svg?style=flat)](https://github.com/rcsb/mmtf-spark/) [![License](http://img.shields.io/badge/license-Apache 2.0-blue.svg?style=flat)](https://github.com/rcsb/mmtf-spark/blob/master/LICENSE.txt)
+[![Status](http://img.shields.io/badge/status-experimental-red.svg?style=flat)](https://github.com/rcsb/mmtf-spark)
 # mmtf-spark
 In this module we provide APIs and  examples of using Apache Spark, MMTF and Hadoop for high-performance structural bioinformatics.
 
